@@ -27,7 +27,7 @@ class BluetoothManager: NSObject {
     
     private var isBusy = false
     
-    private var maxRequests = 20
+    private var maxRequests = 40
     private var nRequests = 0
     private var nResponses = 0
     
@@ -100,7 +100,7 @@ class BluetoothManager: NSObject {
         responseCharacteristic = nil
         isBusy = false
         if nRequests < maxRequests {
-            let delay = 50.0
+            let delay = 100.0
             let restartTime = dispatch_time(DISPATCH_TIME_NOW, Int64(delay * Double(NSEC_PER_MSEC)))
             dispatch_after(restartTime, dispatch_get_main_queue()) {
                 self.startScanForPeripheralWithService(self.serviceUUID)
