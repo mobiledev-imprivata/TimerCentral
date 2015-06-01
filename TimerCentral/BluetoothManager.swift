@@ -27,7 +27,7 @@ class BluetoothManager: NSObject {
     
     private var isBusy = false
     
-    private var maxRequests = 20
+    private var maxRequests = 40
     private var nRequests = 0
     private var nResponses = 0
     
@@ -64,7 +64,7 @@ class BluetoothManager: NSObject {
     private func sendRequest() {
         log("sendRequest")
         let data = "Hello, world!".dataUsingEncoding(NSUTF8StringEncoding)
-        peripheral.writeValue(data, forCharacteristic: requestCharacteristic, type: CBCharacteristicWriteType.WithoutResponse)
+        peripheral.writeValue(data, forCharacteristic: requestCharacteristic, type: CBCharacteristicWriteType.WithResponse)
     }
     
     private func processResponse(responseData: NSData) {
@@ -100,7 +100,7 @@ class BluetoothManager: NSObject {
         responseCharacteristic = nil
         isBusy = false
         if nRequests < maxRequests {
-            let delay = 50.0
+            let delay = 100.0
             let restartTime = dispatch_time(DISPATCH_TIME_NOW, Int64(delay * Double(NSEC_PER_MSEC)))
             dispatch_after(restartTime, dispatch_get_main_queue()) {
                 self.startScanForPeripheralWithService(self.serviceUUID)
@@ -185,12 +185,20 @@ extension BluetoothManager: CBPeripheralDelegate {
                 requestCharacteristic = characteristic as! CBCharacteristic
             case responseCharacteristicUUID:
                 responseCharacteristic = characteristic as! CBCharacteristic
-                peripheral.setNotifyValue(true, forCharacteristic: characteristic as! CBCharacteristic)
             default:
                 break
             }
         }
         sendRequest()
+    }
+    
+    func peripheral(peripheral: CBPeripheral!, didWriteValueForCharacteristic characteristic: CBCharacteristic!, error: NSError!) {
+        if error == nil {
+            log("peripheral didWriteValueForCharacteristic ok")
+            peripheral.readValueForCharacteristic(responseCharacteristic)
+        } else {
+            log("peripheral didWriteValueForCharacteristic error \(error.localizedDescription)")
+        }
     }
     
     func peripheral(peripheral: CBPeripheral!, didUpdateValueForCharacteristic characteristic: CBCharacteristic!, error: NSError!) {
