@@ -11,7 +11,7 @@ import CoreBluetooth
 
 class BluetoothManager: NSObject {
     
-    private let serviceUUID              = CBUUID(string: "D5C677E9-7090-452B-8251-CB3EA027FE4F")
+    private let serviceUUID                = CBUUID(string: "D5C677E9-7090-452B-8251-CB3EA027FE4F")
     private let requestCharacteristicUUID  = CBUUID(string: "2B771F92-CBC8-4C69-816B-B844E87E9CD4")
     private let responseCharacteristicUUID = CBUUID(string: "CD565DAE-C38B-42A7-957C-7D2AAE75DD1D")
     
@@ -27,7 +27,7 @@ class BluetoothManager: NSObject {
     
     private var isBusy = false
     
-    private var maxRequests = 40
+    private var maxRequests = 1
     private var nRequests = 0
     private var nResponses = 0
     
@@ -175,6 +175,11 @@ extension BluetoothManager: CBPeripheralDelegate {
             log("peripheral didDiscoverCharacteristicsForService \(nameFromUUID(service.UUID)) \(service.UUID) ok")
         } else {
             log("peripheral didDiscoverCharacteristicsForService \(nameFromUUID(service.UUID)) \(service.UUID) error \(error.localizedDescription)")
+            return
+        }
+        if service.characteristics.isEmpty {
+            log("no characteristics found")
+            disconnect()
             return
         }
         for characteristic in service.characteristics {
